@@ -1,6 +1,13 @@
 const css = require('./style.scss');
 
+String.prototype.insert = function (index, string) {
+  if (index > 0)
+    return this.substring(0, index) + string + this.substring(index, this.length);
+
+  return string + this;
+};
 // Класс создания таблицы
+
 
 
 class Table {
@@ -10,70 +17,79 @@ class Table {
     this.rows = options.rows;
   }
   createTable() {
-    const tables = document.querySelector('#tables');
-    tables.insertAdjacentHTML('beforeend', `<caption>${this.name}</caption><table id='${this.name}1'><tr id="${this.name}"><td>&nbsp</td></tr </table>`);
-    let unicode = 65;
-    for (let i = 1; i <= this.cols; i++) {
-      $(`#${this.name}`).append(`<th class='bar'><b>${i}</b></th>`);
-    } for (let j = 0; j < this.rows; j++) {
+    let newStr = [`<div class='column first'>0</div>`]
+    let bla = newStr[0];
+    if (bla.indexOf('first')) {
+      console.log('A')
+      let unicode = 65;
       if (unicode > 90) {
         unicode = 65;
       }
-      $(`#${this.name}1`).append(`<tr class='${this.name}row'><td class='first'>${String.fromCodePoint(unicode)}</td></tr>`);
-      unicode++;
+      let rowFirst = `<div id='row'>${String.fromCodePoint(unicode)}</div>`
+      bla.insert(bla.indexOf('<', 2), `${rowFirst.repeat(this.rows)}`)
     }
-    const tr = document.querySelectorAll(`.${this.name}row`);
-    for (const key of tr) {
-      for (let k = 0; k < this.cols; k++) {
-        key.insertAdjacentHTML('beforeend', `<td><div contenteditable="true"></div></td>`);
-      }
+    const tables = document.querySelector('#tables');
+    for (let i = 0; i < this.cols; i++) {
+      let column = `<div class='column'>${i + 1}</div>`
+      newStr.push(column)
     }
+    let row = `<div contenteditable="true" id='row'></div>`
+    let inHtml = []
+
+    newStr
+      .map(item => {
+        inHtml.push(item.insert(item.indexOf('<', 2), `${row.repeat(this.rows)}`))
+      })
+    let strHtml = inHtml.join('')
+    console.log(strHtml)
+    tables.insertAdjacentHTML('beforeend', `${strHtml}`)
   }
 }
 
 const table1 = new Table({
   name: 'table1',
-  cols: 5,
-  rows: 5,
+  cols: 6,
+  rows: 6,
 });
 table1.createTable();
 
-// Добавление двух полосок по бокам при наведении на th
-const cell = document.querySelectorAll('.bar');
-for (const k of cell) {
-  k.addEventListener('mouseover', (e) => {
-    if (e.target.classList.length) {
-      e.target.insertAdjacentHTML('beforeend', `<div id='delete'><div class='resizer resizerleft'></div><div class='resizer resizerright'></div></div>`);
-      // resize
-      const thumb = document.querySelector('.resizer');
-      thumb.addEventListener('mousedown', mousedown);
-      function mousedown(event) {
-        const shiftX = event.clientX - thumb.getBoundingClientRect().left;
-        console.log(shiftX);
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+// // Добавление двух полосок по бокам при наведении на th
+// const cell = document.querySelectorAll('.bar');
+// for (const k of cell) {
+//   k.addEventListener('mouseover', (e) => {
+//     if (e.target.classList.length) {
+//       e.target.insertAdjacentHTML('beforeend', `<div id='delete'><div class='resizer resizerleft'></div><div class='resizer resizerright'></div></div>`);
+//       // resize
+//       const thumb = document.querySelector('.resizer');
+//       thumb.addEventListener('mousedown', mousedown);
+//       function mousedown(event) {
+//         const shiftX = event.clientX - thumb.getBoundingClientRect().left;
+//         console.log(shiftX);
 
-        function onMouseMove(event) {
-          const newLeft = event.clientX - shiftX - e.target.getBoundingClientRect().left;
-          event.target.style.left = newLeft + 'px';
-        }
+//         document.addEventListener('mousemove', onMouseMove);
+//         document.addEventListener('mouseup', onMouseUp);
 
-        function onMouseUp() {
-          document.removeEventListener('mouseup', onMouseUp);
-          document.removeEventListener('mousemove', onMouseMove);
-        }
-      };
-      thumb.ondragstart = function () {
-        return false;
-      };
-    }
-  });
-  // Конец resize
-  k.addEventListener('mouseout', () => {
-    const el = document.querySelector('#delete');
-    el.parentNode.removeChild(el);
-  });
-}
+//         function onMouseMove(event) {
+//           const newLeft = event.clientX - shiftX - e.target.getBoundingClientRect().left;
+//           event.target.style.left = newLeft + 'px';
+//         }
+
+//         function onMouseUp() {
+//           document.removeEventListener('mouseup', onMouseUp);
+//           document.removeEventListener('mousemove', onMouseMove);
+//         }
+//       };
+//       thumb.ondragstart = function () {
+//         return false;
+//       };
+//     }
+//   });
+//   // Конец resize
+//   k.addEventListener('mouseout', () => {
+//     const el = document.querySelector('#delete');
+//     el.parentNode.removeChild(el);
+//   });
+// }
 
 
