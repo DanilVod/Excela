@@ -17,3 +17,19 @@
   text-align: center;
   color: grey;
 }
+
+.row {
+  padding: 10px;
+  border: 1px solid #ccc;
+  display: flex;
+}
+
+.row-content {
+  display: flex;
+}
+
+.row-col {
+  border: 1px solid black;
+  width: 100px;
+  align-items: center;
+}

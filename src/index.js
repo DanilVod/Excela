@@ -1,11 +1,5 @@
 const css = require('./style.scss');
 
-String.prototype.insert = function (index, string) {
-  if (index > 0)
-    return this.substring(0, index) + string + this.substring(index, this.length);
-
-  return string + this;
-};
 // Класс создания таблицы
 
 
@@ -15,37 +9,56 @@ class Table {
     this.name = options.name;
     this.cols = options.cols;
     this.rows = options.rows;
+    this.table = document.querySelector('#table');
   }
-  createTable() {
-    let newStr = [`<div class='column first'>0</div>`]
-    let bla = newStr[0];
-    if (bla.indexOf('first')) {
-      console.log('A')
-      let unicode = 65;
-      if (unicode > 90) {
-        unicode = 65;
-      }
-      let rowFirst = `<div id='row'>${String.fromCodePoint(unicode)}</div>`
-      bla.insert(bla.indexOf('<', 2), `${rowFirst.repeat(this.rows)}`)
-    }
-    const tables = document.querySelector('#tables');
-    for (let i = 0; i < this.cols; i++) {
-      let column = `<div class='column'>${i + 1}</div>`
-      newStr.push(column)
-    }
-    let row = `<div contenteditable="true" id='row'></div>`
-    let inHtml = []
+  //   createTable() {
+  //     let newStr = [`<div class='column first'>0</div>`]
+  //     let bla = newStr[0];
+  //     if (bla.indexOf('first')) {
+  //       console.log('A')
+  //       let unicode = 65;
+  //       if (unicode > 90) {
+  //         unicode = 65;
+  //       }
+  //       let rowFirst = `<div id='row'>${String.fromCodePoint(unicode)}</div>`
+  //       bla.insert(bla.indexOf('<', 2), `${rowFirst.repeat(this.rows)}`)
+  //     }
+  //     const tables = document.querySelector('#tables');
+  //     for (let i = 0; i < this.cols; i++) {
+  //       let column = `<div class='column'>${i + 1}</div>`
+  //       newStr.push(column)
+  //     }
+  //     let row = `<div contenteditable="true" id='row'></div>`
+  //     let inHtml = []
 
-    newStr
-      .map(item => {
-        inHtml.push(item.insert(item.indexOf('<', 2), `${row.repeat(this.rows)}`))
-      })
-    let strHtml = inHtml.join('')
-    console.log(strHtml)
-    tables.insertAdjacentHTML('beforeend', `${strHtml}`)
+  //     newStr
+  //       .map(item => {
+  //         inHtml.push(item.insert(item.indexOf('<', 2), `${row.repeat(this.rows)}`))
+  //       })
+  //     let strHtml = inHtml.join('')
+  //     console.log(strHtml)
+  //     tables.insertAdjacentHTML('beforeend', `${strHtml}`)
+  //   }
+  // }
+
+  createTable() {
+    let rows = [];
+    let cols = []
+    for (let j = 0; j < this.cols; j++) {
+      cols.push(`<div class="row-col">0</div>`)
+    }
+    for (let i = 0; i < this.rows; i++) {
+      rows.push(`<div class="row">
+        <div class="row-info">a
+        </div>
+        <div class="row-content">
+          ${cols.join('')}
+        </div>
+      </div>`)
+    }
+    table.insertAdjacentHTML('beforeend', `${rows.join('')}`)
   }
 }
-
 const table1 = new Table({
   name: 'table1',
   cols: 6,
