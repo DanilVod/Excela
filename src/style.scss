@@ -1,7 +1,6 @@
-#tables {
+#table {
   display: flex;
-  flex-wrap: wrap;
-  justify-items: stretch;
+  flex-direction: column;
 }
 
 .column {
@@ -18,9 +17,19 @@
   color: grey;
 }
 
+.resizer {
+  position: absolute;
+  background-color: black;
+  width: 5px;
+  height: 15px;
+  cursor: se-resize;
+}
+
+.resizer-left {
+  top: 10px;
+}
+
 .row {
-  padding: 10px;
-  border: 1px solid #ccc;
   display: flex;
 }
 
@@ -29,7 +38,15 @@
 }
 
 .row-col {
-  border: 1px solid black;
+  border: 1px solid #dadce0;
   width: 100px;
-  align-items: center;
+  text-align: center;
+  color: grey;
+}
+
+.row-info {
+  border: 1px solid #dadce0;
+  width: 100px;
+  text-align: center;
+  color: grey;
 }

@@ -43,18 +43,33 @@ class Table {
 
   createTable() {
     let rows = [];
-    let cols = []
-    for (let j = 0; j < this.cols; j++) {
-      cols.push(`<div class="row-col">0</div>`)
+    let cols = [];
+    let firstCol = [];
+    let unicode = 65;
+    for (let k = 1; k < this.cols + 1; k++) {
+      firstCol.push(`<div class="first row-col row-col${k - 1}">${k}
+      <div class="resizer resizer-left"></div>
+      </div>`)
     }
+    for (let j = 0; j < this.cols; j++) {
+      cols.push(`<div class="row-col row-col${j}" contenteditable="true"></div>`)
+    }
+    rows.push(`<div class="row">
+        <div class="row-info">
+        </div>
+        <div class="row-content">
+          ${firstCol.join('')}
+        </div>
+      </div>`)
     for (let i = 0; i < this.rows; i++) {
       rows.push(`<div class="row">
-        <div class="row-info">a
+        <div class="row-info">${String.fromCodePoint(unicode)}
         </div>
         <div class="row-content">
           ${cols.join('')}
         </div>
       </div>`)
+      unicode++
     }
     table.insertAdjacentHTML('beforeend', `${rows.join('')}`)
   }
@@ -105,4 +120,51 @@ table1.createTable();
 //   });
 // }
 
+// function resize() {
+//   const element = document.querySelector('.row-col');
+//   const resizers = document.querySelectorAll('.resizer')
+//   for (let i = 0; i < resizers.length; i++) {
+//     const currentResizer = resizers[i];
+//     currentResizer.addEventListener('mousedown', function (e) {
+//       e.preventDefault()
+//       currentResizer.addEventListener('mousemove', resize)
+//       window.addEventListener('mouseup', stopResize)
+//     })
+//     function resize(e) {
+//       if (currentResizer.classList.contains('resizer-left')) {
+//         console.log(e)
+//         element.style.width = e.pageX - element.getBoundingClientRect().left + 'px';
+//       }
+//     }
+//     function stopResize() {
+//       window.removeEventListener('mousemove', resize)
+//     }
+//   }
+// }
+// resize()
 
+function makeResizableDiv() {
+
+  const element = document.querySelector('.row-col')
+  window.addEventListener('click', function () { console.log(this, arguments[0].target.classList); })
+  const resizers = document.querySelectorAll('.resizer')
+  for (let i = 0; i < resizers.length; i++) {
+    const currentResizer = resizers[i];
+    currentResizer.addEventListener('mousedown', function (e) {
+      e.preventDefault()
+      window.addEventListener('mousemove', resize)
+      window.addEventListener('mouseup', stopResize)
+    })
+
+    function resize(e) {
+      if (currentResizer.classList.contains('resizer-left')) {
+        element.style.width = e.pageX - element.getBoundingClientRect().left + 'px'
+      }
+    }
+
+    function stopResize() {
+      window.removeEventListener('mousemove', resize)
+    }
+  }
+}
+makeResizableDiv()
