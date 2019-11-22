@@ -1,9 +1,7 @@
+//Подключение стилей
 const css = require('./style.scss');
 
 // Класс создания таблицы
-
-
-
 class Table {
   constructor(options) {
     this.name = options.name;
@@ -17,12 +15,13 @@ class Table {
     let firstCol = [];
     let unicode = 65;
     for (let k = 1; k < this.cols + 1; k++) {
-      firstCol.push(`<div class="first row-col row-col${k - 1}">${k}
-      <div class="resizer resizer-left"></div>
+      firstCol.push(`<div class="first row-col" data-col='${k}'>${String.fromCodePoint(unicode)}
+      <div class="resizerCol resizer-left"></div>
       </div>`)
+      unicode++
     }
     for (let j = 0; j < this.cols; j++) {
-      cols.push(`<div class="row-col row-col${j}" contenteditable="true"></div>`)
+      cols.push(`<div class="row-col" contenteditable="true" data-col='${j + 1}'></div>`)
     }
     rows.push(`<div class="row">
         <div class="row-info">
@@ -33,7 +32,8 @@ class Table {
       </div>`)
     for (let i = 0; i < this.rows; i++) {
       rows.push(`<div class="row">
-        <div class="row-info">${String.fromCodePoint(unicode)}
+        <div class="row-info" data-row="${i + 1}">${i + 1}
+        <div class="resizerRow resizer-left"></div>
         </div>
         <div class="row-content">
           ${cols.join('')}
@@ -45,6 +45,7 @@ class Table {
     return this.cols
   }
 }
+
 const table1 = new Table({
   name: 'table1',
   cols: 6,
@@ -52,32 +53,33 @@ const table1 = new Table({
 });
 table1.createTable();
 
-function resize() {
-  for (let i = 0; i < table1.cols; i++) {
-    const element = document.querySelectorAll(`.row-col0`)
-    const resizers = document.querySelectorAll('.resizer')
-    for (let i = 0; i < resizers.length; i++) {
-      const currentResizer = resizers[i];
-      currentResizer.addEventListener('mousedown', function (e) {
-        e.preventDefault()
-        window.addEventListener('mousemove', resize)
-        window.addEventListener('mouseup', stopResize)
-      })
-
-      function resize(e) {
-        if (currentResizer.classList.contains('resizer-left')) {
-          for (let i = 0; i < element.length; i++) {
-            element[i].style.width = e.pageX - element[i].getBoundingClientRect().left + 'px'
-          }
-          element[i].style.width = e.pageX - element[i].getBoundingClientRect().left + 'px'
-
-        }
-      }
-
-      function stopResize() {
-        window.removeEventListener('mousemove', resize)
+function makeResize() {
+  document.addEventListener('mousedown', function (event) {
+    let parentCol = event.target.closest('.first')
+    let parentRow = event.target.closest('.row-info')
+    if (parentRow) {
+      let rows = document.querySelectorAll(`[data-row="${parentRow.dataset.row}"]`)
+      let cordsRow = parentRow.getBoundingClientRect()
+      document.onmousemove = function (e) {
+        let deltaRow = e.pageY - cordsRow.bottom
+        let height = cordsRow.height + deltaRow + 'px'
+        parentRow.style.height = height
+        rows.forEach((row) => row.style.height = height)
       }
     }
-  }
+    if (parentCol) {
+      let cols = document.querySelectorAll(`[data-col="${parentCol.dataset.col}"]`)
+      let cordsCol = parentCol.getBoundingClientRect()
+      document.onmousemove = function (e) {
+        let deltaCol = e.pageX - cordsCol.right
+        let width = cordsCol.width + deltaCol + 'px'
+        parentCol.style.width = width
+        cols.forEach((col) => col.style.width = width)
+      }
+    }
+    document.onmouseup = function () {
+      document.onmousemove = null
+    }
+  });
 }
-resize()
+makeResize()
