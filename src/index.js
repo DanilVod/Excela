@@ -1,79 +1,87 @@
+//Подключение стилей
 const css = require('./style.scss');
 
 // Класс создания таблицы
-
-
 class Table {
   constructor(options) {
-    this.name = options.name;
-    this.cols = options.cols;
-    this.rows = options.rows;
+    this.colsCount = options.colsCount;
+    this.rowsCount = options.rowsCount;
+    this.table = document.querySelector('#table');
   }
+  //функция создания таблицы
   createTable() {
-    const tables = document.querySelector('#tables');
-    tables.insertAdjacentHTML('beforeend', `<caption>${this.name}</caption><table id='${this.name}1'><tr id="${this.name}"><td>&nbsp</td></tr </table>`);
+    const rows = [];
+    const cols = [];
+    const firstCol = [];
     let unicode = 65;
-    for (let i = 1; i <= this.cols; i++) {
-      $(`#${this.name}`).append(`<th class='bar'><b>${i}</b></th>`);
-    } for (let j = 0; j < this.rows; j++) {
-      if (unicode > 90) {
-        unicode = 65;
-      }
-      $(`#${this.name}1`).append(`<tr class='${this.name}row'><td class='first'>${String.fromCodePoint(unicode)}</td></tr>`);
-      unicode++;
+    //создание колонок
+    for (let k = 1; k < this.colsCount + 1; k++) {
+      firstCol.push(`<div class="first row-col" data-col='${k}'>${String.fromCodePoint(unicode)}
+      <div class="resizerCol"></div>
+      </div>`)
+      unicode++
     }
-    const tr = document.querySelectorAll(`.${this.name}row`);
-    for (const key of tr) {
-      for (let k = 0; k < this.cols; k++) {
-        key.insertAdjacentHTML('beforeend', `<td><div contenteditable="true"></div></td>`);
-      }
+    //создание строк
+    for (let j = 0; j < this.colsCount; j++) {
+      cols.push(`<div class="row-col" contenteditable="true" data-col='${j + 1}'></div>`)
     }
+    rows.push(`<div class="row">
+        <div class="row-info">
+        </div>
+        <div class="row-content">
+          ${firstCol.join('')}
+        </div>
+      </div>`)
+    for (let i = 0; i < this.rowsCount; i++) {
+      rows.push(`<div class="row">
+        <div class="row-info" data-row="${i + 1}">${i + 1}
+        <div class="resizerRow"></div>
+        </div>
+        <div class="row-content">
+          ${cols.join('')}
+        </div>
+      </div>`)
+      unicode++
+    }
+    table.insertAdjacentHTML('beforeend', `${rows.join('')}`)
   }
 }
-
+//Создаем таблицу с параметрами
 const table1 = new Table({
-  name: 'table1',
-  cols: 5,
-  rows: 5,
+  colsCount: 6,
+  rowsCount: 6,
 });
 table1.createTable();
 
-// Добавление двух полосок по бокам при наведении на th
-const cell = document.querySelectorAll('.bar');
-for (const k of cell) {
-  k.addEventListener('mouseover', (e) => {
-    if (e.target.classList.length) {
-      e.target.insertAdjacentHTML('beforeend', `<div id='delete'><div class='resizer resizerleft'></div><div class='resizer resizerright'></div></div>`);
-      // resize
-      const thumb = document.querySelector('.resizer');
-      thumb.addEventListener('mousedown', mousedown);
-      function mousedown(event) {
-        const shiftX = event.clientX - thumb.getBoundingClientRect().left;
-        console.log(shiftX);
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-
-        function onMouseMove(event) {
-          const newLeft = event.clientX - shiftX - e.target.getBoundingClientRect().left;
-          event.target.style.left = newLeft + 'px';
-        }
-
-        function onMouseUp() {
-          document.removeEventListener('mouseup', onMouseUp);
-          document.removeEventListener('mousemove', onMouseMove);
-        }
-      };
-      thumb.ondragstart = function () {
-        return false;
-      };
+function makeResize() {
+  document.addEventListener('mousedown', function (event) {
+    let parentCol = event.target.closest('.first')
+    let parentRow = event.target.closest('.row-info')
+    if (parentRow) {
+      //Функция ресайза строк
+      let rows = document.querySelectorAll(`[data-row="${parentRow.dataset.row}"]`)
+      let cordsRow = parentRow.getBoundingClientRect()
+      document.onmousemove = function (e) {
+        let deltaRow = e.pageY - cordsRow.bottom
+        let height = cordsRow.height + deltaRow + 'px'
+        parentRow.style.height = height
+        rows.forEach((row) => row.style.height = height)
+      }
+    }
+    if (parentCol) {
+      //Функция ресайза колонок
+      let cols = document.querySelectorAll(`[data-col="${parentCol.dataset.col}"]`)
+      let cordsCol = parentCol.getBoundingClientRect()
+      document.onmousemove = function (e) {
+        let deltaCol = e.pageX - cordsCol.right
+        let width = cordsCol.width + deltaCol + 'px'
+        parentCol.style.width = width
+        cols.forEach((col) => col.style.width = width)
+      }
+    }
+    document.onmouseup = function () {
+      document.onmousemove = null
     }
   });
-  // Конец resize
-  k.addEventListener('mouseout', () => {
-    const el = document.querySelector('#delete');
-    el.parentNode.removeChild(el);
-  });
 }
-
-
+makeResize()
