@@ -53,7 +53,6 @@ const table1 = new Table({
 });
 table1.createTable();
 
-
 function makeResize() {
   document.addEventListener('mousedown', function (event) {
     let parentCol = event.target.closest('.first')
