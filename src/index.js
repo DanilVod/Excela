@@ -62,11 +62,9 @@ function makeResize() {
       let cordsRow = parentRow.getBoundingClientRect()
       document.onmousemove = function (e) {
         let rows = document.querySelectorAll(`[data-row="${parentRow.dataset.row}"]`)
-        let rowNumber = rows[0].dataset.row
         let deltaRow = e.pageY - cordsRow.bottom
         let height = cordsRow.height + deltaRow + 'px'
         parentRow.style.height = height
-        localStorage.setItem(`height${rowNumber}`, `${height}`)
       }
     }
     if (parentCol) {
@@ -74,12 +72,10 @@ function makeResize() {
       let cols = document.querySelectorAll(`[data-col="${parentCol.dataset.col}"]`)
       let cordsCol = parentCol.getBoundingClientRect()
       document.onmousemove = function (e) {
-        let colNumber = cols[0].dataset.col
         let deltaCol = e.pageX - cordsCol.right
         let width = cordsCol.width + deltaCol + 'px'
         parentCol.style.width = width
         cols.forEach((col) => col.style.width = width)
-        localStorage.setItem(`width${colNumber}`, `${width}`)
       }
     }
     document.onmouseup = function () {
@@ -88,26 +84,3 @@ function makeResize() {
   });
 }
 makeResize()
-//localstorage
-function doLocalStorage() {
-  let rowsCount = document.querySelectorAll('.row-info')
-  for (let i = 0; i < rowsCount.length; i++) {
-
-    if (localStorage.getItem(`height${i}`) !== null) {
-      rowsCount[i].style.height = localStorage.getItem(`height${i}`)
-    }
-  }
-  let colsCount = document.querySelectorAll('.first')
-  let cols1 = document.querySelectorAll(`.row-col`)
-
-  for (let i = 0; i < colsCount.length; i++) {
-    if (localStorage.getItem(`width${i}`) !== null) {
-      cols1.forEach((el) => {
-        if (el.dataset.col == i) {
-          el.style.width = localStorage.getItem(`width${i}`)
-        }
-      })
-    }
-  }
-}
-doLocalStorage()
