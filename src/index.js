@@ -1,47 +1,35 @@
 //Подключение стилей
-const css = require('./style.scss');
+import './style.scss'
+import { createCol, createRow, createCell, setToLocalValue } from './templates'
+// localStorage.setItem('height', JSON.stringify({ '1': 24 }))
+//pure function
+//Императивный подход
+//Функциональное программирование
 
 // Класс создания таблицы
 class Table {
   constructor(options) {
-    this.colsCount = options.colsCount;
-    this.rowsCount = options.rowsCount;
-    this.table = document.querySelector('#table');
+    this.colsCount = options.colsCount
+    this.rowsCount = options.rowsCount
+    this.$table = document.querySelector('#table')
   }
   //функция создания таблицы
   createTable() {
-    const rows = [];
-    const cols = [];
-    const firstCol = [];
-    let unicode = 65;
+    const rows = []
+    const cols = []
+    const firstCol = []
+
     //создание колонок
     for (let k = 1; k < this.colsCount + 1; k++) {
-      firstCol.push(`<div class="first row-col" style="width: ${localStorage.getItem(`width${k}`)};" data-col='${k}'>${String.fromCodePoint(unicode)}
-      <div class="resizerCol"></div>
-      </div>`)
-      unicode++
+      firstCol.push(createCol(k))
     }
     //создание строк
     for (let j = 0; j < this.colsCount; j++) {
-      cols.push(`<div class="row-col" contenteditable="true" style="width: ${localStorage.getItem(`width${j + 1}`)};" data-col='${j + 1}'></div>`)
+      cols.push(createRow(j))
     }
-    rows.push(`<div class="row">
-        <div class="row-info">
-        </div>
-        <div class="row-content">
-          ${firstCol.join('')}
-        </div>
-      </div>`)
+    rows.push(createCell(firstCol))
     for (let i = 0; i < this.rowsCount; i++) {
-      rows.push(`<div class="row">
-        <div class="row-info" style="height: ${localStorage.getItem(`height${i + 1}`)};" data-row="${i + 1}">${i + 1}
-        <div class="resizerRow"></div>
-        </div>
-        <div class="row-content">
-          ${cols.join('')}
-        </div>
-      </div>`)
-      unicode++
+      rows.push(createCell(cols, i))
     }
     table.insertAdjacentHTML('beforeend', `${rows.join('')}`)
   }
@@ -49,39 +37,78 @@ class Table {
 //Создаем таблицу с параметрами
 const table1 = new Table({
   colsCount: 6,
-  rowsCount: 6,
-});
-table1.createTable();
+  rowsCount: 6
+})
+table1.createTable()
 
+// const rowState = {
+//   '1': 120,
+//   '3': 45
+// }
 function makeResize() {
-  document.addEventListener('mousedown', function (event) {
-    let parentCol = event.target.closest('.first')
-    let parentRow = event.target.closest('.row-info')
-    if (parentRow) {
+  document.addEventListener('mousedown', function(event) {
+    if (event.target.dataset.resize === 'row') {
+      let parentRow = event.target.closest('.row')
       //Функция ресайза строк
       let cordsRow = parentRow.getBoundingClientRect()
-      document.onmousemove = function (e) {
+      document.onmousemove = function(e) {
         let deltaRow = e.pageY - cordsRow.bottom
-        let height = cordsRow.height + deltaRow + 'px'
-        parentRow.style.height = height
-        localStorage.setItem(`height${parentRow.dataset.row}`, `${height}`)
+        let height = cordsRow.height + deltaRow
+        parentRow.style.height = height + 'px'
+        const parent = parentRow.dataset.row
+        localStorage.setItem(
+          'height',
+          setToLocalValue(parent, height, 'height')
+        )
       }
-    }
-    if (parentCol) {
+    } else if (event.target.dataset.resize === 'col') {
+      let parentCol = event.target.closest('.first')
+      let cols = document.querySelectorAll(
+        `[data-col="${parentCol.dataset.col}"]`
+      )
       //Функция ресайза колонок
-      let cols = document.querySelectorAll(`[data-col="${parentCol.dataset.col}"]`)
       let cordsCol = parentCol.getBoundingClientRect()
-      document.onmousemove = function (e) {
+
+      document.onmousemove = function(e) {
         let deltaCol = e.pageX - cordsCol.right
-        let width = cordsCol.width + deltaCol + 'px'
-        parentCol.style.width = width
-        cols.forEach((col) => col.style.width = width)
-        localStorage.setItem(`width${parentCol.dataset.col}`, `${width}`)
+        let width = cordsCol.width + deltaCol
+        parentCol.style.width = width + 'px'
+        cols.forEach(col => (col.style.width = width + 'px'))
+        const parent = parentCol.dataset.col
+        localStorage.setItem('width', setToLocalValue(parent, width, 'width'))
       }
     }
-    document.onmouseup = function () {
+
+    document.onmouseup = function() {
       document.onmousemove = null
     }
-  });
+  })
 }
+
 makeResize()
+
+window.addEventListener('load', function() {
+  const cell = document.querySelectorAll('.cell')
+
+  for (let i = 0; i < cell.length; i++) {
+    const coords =
+      cell[i].parentNode.parentNode.dataset.row + '-' + cell[i].dataset.col
+    cell[i].oninput = function() {
+      localStorage.setItem(
+        'div',
+        setToLocalValue(
+          coords,
+          cell[i].innerHTML.replace(/\s*\n\s*/g, ''),
+          'div'
+        )
+      )
+    }
+    JSON.parse(localStorage.getItem(`div`)) == null
+      ? (cell[i].innerHTML = '')
+      : typeof (cell[i].innerHTML = JSON.parse(localStorage.getItem(`div`))[
+          coords
+        ]) == 'undefined'
+      ? (cell[i].innerHTML = '')
+      : (cell[i].innerHTML = JSON.parse(localStorage.getItem(`div`))[coords])
+  }
+})
