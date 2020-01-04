@@ -1,10 +1,7 @@
 //Подключение стилей
 import './style.scss'
-import { createCol, createRow, createCell, setToLocalValue } from './templates'
-// localStorage.setItem('height', JSON.stringify({ '1': 24 }))
-//pure function
-//Императивный подход
-//Функциональное программирование
+import { createTable } from './templates'
+import { setToLocalValue } from './values'
 
 // Класс создания таблицы
 class Table {
@@ -12,48 +9,25 @@ class Table {
     this.colsCount = options.colsCount
     this.rowsCount = options.rowsCount
     this.$table = document.querySelector('#table')
-  }
-  //функция создания таблицы
-  createTable() {
-    const rows = []
-    const cols = []
-    const firstCol = []
-
-    //создание колонок
-    for (let k = 1; k < this.colsCount + 1; k++) {
-      firstCol.push(createCol(k))
-    }
-    //создание строк
-    for (let j = 0; j < this.colsCount; j++) {
-      cols.push(createRow(j))
-    }
-    rows.push(createCell(firstCol))
-    for (let i = 0; i < this.rowsCount; i++) {
-      rows.push(createCell(cols, i))
-    }
-    table.insertAdjacentHTML('beforeend', `${rows.join('')}`)
+    this.createTable = createTable.bind(this)
   }
 }
 //Создаем таблицу с параметрами
 const table1 = new Table({
-  colsCount: 6,
-  rowsCount: 6
+  colsCount: 10,
+  rowsCount: 10
 })
 table1.createTable()
 
-// const rowState = {
-//   '1': 120,
-//   '3': 45
-// }
 function makeResize() {
   document.addEventListener('mousedown', function(event) {
     if (event.target.dataset.resize === 'row') {
-      let parentRow = event.target.closest('.row')
+      const parentRow = event.target.closest('.row')
       //Функция ресайза строк
-      let cordsRow = parentRow.getBoundingClientRect()
+      const cordsRow = parentRow.getBoundingClientRect()
       document.onmousemove = function(e) {
-        let deltaRow = e.pageY - cordsRow.bottom
-        let height = cordsRow.height + deltaRow
+        const deltaRow = e.pageY - cordsRow.bottom
+        const height = cordsRow.height + deltaRow
         parentRow.style.height = height + 'px'
         const parent = parentRow.dataset.row
         localStorage.setItem(
@@ -62,16 +36,16 @@ function makeResize() {
         )
       }
     } else if (event.target.dataset.resize === 'col') {
-      let parentCol = event.target.closest('.first')
-      let cols = document.querySelectorAll(
+      const parentCol = event.target.closest('.first')
+      const cols = document.querySelectorAll(
         `[data-col="${parentCol.dataset.col}"]`
       )
       //Функция ресайза колонок
-      let cordsCol = parentCol.getBoundingClientRect()
+      const cordsCol = parentCol.getBoundingClientRect()
 
       document.onmousemove = function(e) {
-        let deltaCol = e.pageX - cordsCol.right
-        let width = cordsCol.width + deltaCol
+        const deltaCol = e.pageX - cordsCol.right
+        const width = cordsCol.width + deltaCol
         parentCol.style.width = width + 'px'
         cols.forEach(col => (col.style.width = width + 'px'))
         const parent = parentCol.dataset.col
@@ -84,31 +58,13 @@ function makeResize() {
     }
   })
 }
-
 makeResize()
 
 window.addEventListener('load', function() {
-  const cell = document.querySelectorAll('.cell')
-
-  for (let i = 0; i < cell.length; i++) {
+  document.addEventListener('input', function(e) {
     const coords =
-      cell[i].parentNode.parentNode.dataset.row + '-' + cell[i].dataset.col
-    cell[i].oninput = function() {
-      localStorage.setItem(
-        'div',
-        setToLocalValue(
-          coords,
-          cell[i].innerHTML.replace(/\s*\n\s*/g, ''),
-          'div'
-        )
-      )
-    }
-    JSON.parse(localStorage.getItem(`div`)) == null
-      ? (cell[i].innerHTML = '')
-      : typeof (cell[i].innerHTML = JSON.parse(localStorage.getItem(`div`))[
-          coords
-        ]) == 'undefined'
-      ? (cell[i].innerHTML = '')
-      : (cell[i].innerHTML = JSON.parse(localStorage.getItem(`div`))[coords])
-  }
+      e.target.parentNode.parentNode.dataset.row + '-' + e.target.dataset.col
+    const contentInHTML = e.target.innerHTML.replace(/\s*\n\s*/g, '')
+    localStorage.setItem('div', setToLocalValue(coords, contentInHTML, 'div'))
+  })
 })
