@@ -2,33 +2,41 @@
   display: flex;
   flex-direction: column;
 }
+
 .row {
   display: flex;
+  height: 24px;
 
-  .row-info {display: flex;
+  .row-info {
+    display: flex;
     position: relative;
     border: 1px solid #dadce0;
     width: 100px;
-    height: 25px;
     text-align: center;
     color: grey;
     justify-content: center;
     align-items: center;
 
     .resizerRow {
+      opacity: 0;
       position: absolute;
       background-color: rgb(14, 101, 235);
       width: 100px;
       height: 5px;
       bottom: 0px;
-      cursor: se-resize;
+      cursor: row-resize;
+
+      &:hover {
+        display: block;
+        opacity: 1;
+      }
     }
   }
 
   .row-content {
     display: flex;
 
-    .row-col {
+    .cell {
       display: flex;
       border: 1px solid #dadce0;
       width: 100px;
@@ -39,19 +47,30 @@
     }
 
     .first {
+      display: flex;
+      border: 1px solid #dadce0;
+      width: 100px;
+      text-align: center;
+      color: grey;
+      justify-content: center;
+      align-items: center;
       position: relative;
 
       .resizerCol {
         position: absolute;
         background-color: rgb(14, 101, 235);
+        opacity: 0;
         width: 5px;
         top: 0;
         bottom: 0;
         right: 0;
         cursor: se-resize;
-      }
 
+        &:hover {
+          display: block;
+          opacity: 1;
+        }
+      }
     }
   }
-
 }

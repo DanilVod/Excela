@@ -5,7 +5,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.join(__dirname, "dist"),
-    filename: 'bundle.js'
+    filename: 'bundle.[hash].js'
   },
   devServer: {
     port: 8080,

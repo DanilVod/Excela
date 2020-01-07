@@ -1,86 +1,92 @@
 //Подключение стилей
-const css = require('./style.scss');
+import './style.scss'
+import { createTable } from './templates'
+import { setToLocalValue } from './values'
 
 // Класс создания таблицы
 class Table {
   constructor(options) {
-    this.colsCount = options.colsCount;
-    this.rowsCount = options.rowsCount;
-    this.table = document.querySelector('#table');
-  }
-  //функция создания таблицы
-  createTable() {
-    const rows = [];
-    const cols = [];
-    const firstCol = [];
-    let unicode = 65;
-    //создание колонок
-    for (let k = 1; k < this.colsCount + 1; k++) {
-      firstCol.push(`<div class="first row-col" data-col='${k}'>${String.fromCodePoint(unicode)}
-      <div class="resizerCol"></div>
-      </div>`)
-      unicode++
-    }
-    //создание строк
-    for (let j = 0; j < this.colsCount; j++) {
-      cols.push(`<div class="row-col" contenteditable="true" data-col='${j + 1}'></div>`)
-    }
-    rows.push(`<div class="row">
-        <div class="row-info">
-        </div>
-        <div class="row-content">
-          ${firstCol.join('')}
-        </div>
-      </div>`)
-    for (let i = 0; i < this.rowsCount; i++) {
-      rows.push(`<div class="row">
-        <div class="row-info" data-row="${i + 1}">${i + 1}
-        <div class="resizerRow"></div>
-        </div>
-        <div class="row-content">
-          ${cols.join('')}
-        </div>
-      </div>`)
-      unicode++
-    }
-    table.insertAdjacentHTML('beforeend', `${rows.join('')}`)
+    this.colsCount = options.colsCount
+    this.rowsCount = options.rowsCount
+    this.$table = document.querySelector('#table')
+    this.createTable = createTable.bind(this)
   }
 }
 //Создаем таблицу с параметрами
 const table1 = new Table({
-  colsCount: 6,
-  rowsCount: 6,
-});
-table1.createTable();
+  colsCount: 10,
+  rowsCount: 10
+})
+table1.createTable()
 
 function makeResize() {
-  document.addEventListener('mousedown', function (event) {
-    let parentCol = event.target.closest('.first')
-    let parentRow = event.target.closest('.row-info')
-    if (parentRow) {
+  document.addEventListener('mousedown', function(event) {
+    if (event.target.dataset.resize === 'row') {
+      const parentRow = event.target.closest('.row')
       //Функция ресайза строк
-      let cordsRow = parentRow.getBoundingClientRect()
-      document.onmousemove = function (e) {
-        let rows = document.querySelectorAll(`[data-row="${parentRow.dataset.row}"]`)
-        let deltaRow = e.pageY - cordsRow.bottom
-        let height = cordsRow.height + deltaRow + 'px'
-        parentRow.style.height = height
+      const cordsRow = parentRow.getBoundingClientRect()
+      document.onmousemove = function(e) {
+        const deltaRow = e.pageY - cordsRow.bottom
+        const height = cordsRow.height + deltaRow
+        parentRow.style.height = height + 'px'
+        const parent = parentRow.dataset.row
+        localStorage.setItem(
+          'height',
+          setToLocalValue(parent, height, 'height')
+        )
       }
-    }
-    if (parentCol) {
+    } else if (event.target.dataset.resize === 'col') {
+      const parentCol = event.target.closest('.first')
+      const cols = document.querySelectorAll(
+        `[data-col="${parentCol.dataset.col}"]`
+      )
       //Функция ресайза колонок
-      let cols = document.querySelectorAll(`[data-col="${parentCol.dataset.col}"]`)
-      let cordsCol = parentCol.getBoundingClientRect()
-      document.onmousemove = function (e) {
-        let deltaCol = e.pageX - cordsCol.right
-        let width = cordsCol.width + deltaCol + 'px'
-        parentCol.style.width = width
-        cols.forEach((col) => col.style.width = width)
+      const cordsCol = parentCol.getBoundingClientRect()
+
+      document.onmousemove = function(e) {
+        const deltaCol = e.pageX - cordsCol.right
+        const width = cordsCol.width + deltaCol
+        parentCol.style.width = width + 'px'
+        cols.forEach(col => (col.style.width = width + 'px'))
+        const parent = parentCol.dataset.col
+        localStorage.setItem('width', setToLocalValue(parent, width, 'width'))
       }
     }
-    document.onmouseup = function () {
+
+    document.onmouseup = function() {
       document.onmousemove = null
     }
-  });
+  })
+}
+function debounce(f, ms) {
+  let isCooldown = false
+
+  return function() {
+    if (isCooldown) return
+
+    f.apply(this, arguments)
+
+    isCooldown = true
+
+    setTimeout(() => (isCooldown = false), ms)
+  }
 }
 makeResize()
+
+window.addEventListener('load', function() {
+  document.addEventListener('input', function(e) {
+    const coords =
+      e.target.closest('.row').dataset.row + '-' + e.target.dataset.col
+    const contentInHTML = e.target.innerHTML.trim()
+
+    debounce(
+      (function() {
+        localStorage.setItem(
+          'div',
+          setToLocalValue(coords, contentInHTML, 'div')
+        )
+      })(),
+      1000
+    )
+  })
+})
