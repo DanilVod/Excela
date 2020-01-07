@@ -58,13 +58,35 @@ function makeResize() {
     }
   })
 }
+function debounce(f, ms) {
+  let isCooldown = false
+
+  return function() {
+    if (isCooldown) return
+
+    f.apply(this, arguments)
+
+    isCooldown = true
+
+    setTimeout(() => (isCooldown = false), ms)
+  }
+}
 makeResize()
 
 window.addEventListener('load', function() {
   document.addEventListener('input', function(e) {
     const coords =
-      e.target.parentNode.parentNode.dataset.row + '-' + e.target.dataset.col
-    const contentInHTML = e.target.innerHTML.replace(/\s*\n\s*/g, '')
-    localStorage.setItem('div', setToLocalValue(coords, contentInHTML, 'div'))
+      e.target.closest('.row').dataset.row + '-' + e.target.dataset.col
+    const contentInHTML = e.target.innerHTML.trim()
+
+    debounce(
+      (function() {
+        localStorage.setItem(
+          'div',
+          setToLocalValue(coords, contentInHTML, 'div')
+        )
+      })(),
+      1000
+    )
   })
 })

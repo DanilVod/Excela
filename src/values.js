@@ -14,7 +14,7 @@ export function getHeight(index) {
 }
 
 export function setToLocalValue(name, value, prop) {
-  const state = JSON.parse(localStorage.getItem(`${prop}`))
+  const state = JSON.parse(localStorage.getItem(prop))
   if (state == null) {
     return JSON.stringify({ [name]: value })
   }
