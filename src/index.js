@@ -14,8 +14,8 @@ class Table {
 }
 //Создаем таблицу с параметрами
 const table1 = new Table({
-  colsCount: 10,
-  rowsCount: 10
+  colsCount: 5,
+  rowsCount: 5
 })
 table1.createTable()
 
@@ -89,4 +89,90 @@ window.addEventListener('load', function() {
       1000
     )
   })
+})
+
+function action(button) {
+  for (let i = 0; i < value.length; i++) {
+    let valueTarget = value[i].target.closest('.cell')
+    const coords =
+      value[i].target.closest('.row').dataset.row +
+      '-' +
+      valueTarget.dataset.col
+    button == 'bold'
+      ? valueTarget.style.fontWeight == button
+        ? (valueTarget.style.fontWeight = 'normal')
+        : (valueTarget.style.fontWeight = button)
+      : ''
+    button == 'italic'
+      ? valueTarget.style.fontStyle == button
+        ? (valueTarget.style.fontStyle = 'normal')
+        : (valueTarget.style.fontStyle = button)
+      : ''
+    button == 'underline'
+      ? valueTarget.style.textDecoration == button
+        ? (valueTarget.style.textDecoration = 'none')
+        : (valueTarget.style.textDecoration = button)
+      : (valueTarget.style.justifyContent = button)
+    localStorage.setItem(
+      'fontWeight',
+      setToLocalValue(coords, value[i].target.style.fontWeight, 'fontWeight')
+    )
+    localStorage.setItem(
+      'fontStyle',
+      setToLocalValue(coords, value[i].target.style.fontStyle, 'fontStyle')
+    )
+    localStorage.setItem(
+      'textDecoration',
+      setToLocalValue(
+        coords,
+        value[i].target.style.textDecoration,
+        'textDecoration'
+      )
+    )
+    localStorage.setItem(
+      'justifyContent',
+      setToLocalValue(
+        coords,
+        value[i].target.style.justifyContent,
+        'justifyContent'
+      )
+    )
+  }
+}
+
+const table = document.querySelector('#table')
+let value = []
+table.onclick = function(e) {
+  let eTarget = e.target.closest('.cell')
+  eTarget.style.border = 'solid rgb(14, 101, 235) 2px'
+
+  if (e.ctrlKey) {
+    if (value.length !== 0) {
+      //Проверка на повторный клик по той же ячейке
+      value.reduce((prevItem, curItem) =>
+        prevItem.target.offsetHeight == curItem.target.offsetHeight
+          ? value.pop()
+          : ''
+      )
+    }
+    value.push(e)
+  } else if (!e.ctrlKey) {
+    if (Object.keys(value).length > 1) {
+      for (let i = 0; i < value.length; i++) {
+        value[i].target.closest('.cell').style.border =
+          'solid rgb(14, 101, 235) 2px'
+      }
+    }
+    for (let i = 0; i < value.length; i++) {
+      console.log(value)
+      console.log(value.length)
+      value[i].target.closest('.cell').style.border = '1px solid #dadce0'
+    }
+    value = []
+    value.push(e)
+  }
+}
+const toolbar = document.querySelector('#toolbar')
+toolbar.addEventListener('click', e => {
+  action(`${e.target.id}`)
 })

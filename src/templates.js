@@ -4,7 +4,6 @@ export const createTable = function() {
   const rows = []
   const firstCol = []
   //создание первой строки
-  console.log(colsCount)
   for (let k = 1; k < this.colsCount + 1; k++) {
     firstCol.push(createFirstRow(k))
   }
@@ -66,7 +65,27 @@ function createCol(rowIndex, colIndex) {
   <div 
       class="cell" 
       contenteditable="true"
-      style="width: ${getWidth(colIndex + 1)}px" 
+      style="width: ${getWidth(colIndex + 1)}px;
+      font-weight:${
+        JSON.parse(localStorage.getItem(`fontWeight`))[
+          rowIndex + 1 + '-' + (colIndex + 1)
+        ]
+      };
+      font-style:${
+        JSON.parse(localStorage.getItem(`fontStyle`))[
+          rowIndex + 1 + '-' + (colIndex + 1)
+        ]
+      };
+      text-decoration:${
+        JSON.parse(localStorage.getItem(`textDecoration`))[
+          rowIndex + 1 + '-' + (colIndex + 1)
+        ]
+      };
+      justify-content:${
+        JSON.parse(localStorage.getItem(`justifyContent`))[
+          rowIndex + 1 + '-' + (colIndex + 1)
+        ]
+      };"
       data-col='${colIndex + 1}'
       >
       ${
@@ -83,3 +102,27 @@ function createCol(rowIndex, colIndex) {
   </div>
   `
 }
+
+function createButtons() {
+  const buttons = []
+  const name = [
+    'bold',
+    'italic',
+    'underline',
+    'flex-start',
+    'center',
+    'flex-end'
+  ]
+  for (let i = 0; i < name.length; i++) {
+    buttons.push(`<button id=${name[i]}>
+    <img src="../img/${name[i]}.svg" />
+  </button>`)
+  }
+  return buttons
+}
+function createToolbar() {
+  const toolbar = []
+  toolbar.push(`<div id="toolbar">${createButtons().join('')}</div>`)
+  table.insertAdjacentHTML('beforeBegin', `${toolbar.join('')}`)
+}
+createToolbar()
